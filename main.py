@@ -73,13 +73,17 @@ def main():
         quit()
     symbol = "XAUUSDm"
     end_time = datetime.now()
-    start_time = end_time - timedelta(minutes=1440)
+    #start_time = end_time - timedelta(minutes=365*10)
+    start_time = end_time - timedelta(days=365*10)
     time_frame = mt5.TIMEFRAME_M1
     time_frame2 = mt5.TIMEFRAME_H1
+    time_frame_1_hour = mt5.TIMEFRAME_H1
+    time_frame_4_hour = mt5.TIMEFRAME_H4
+    time_frame_daily = mt5.TIMEFRAME_D1
     print(time_frame2)
     #rates = mt5.copy_rates_range(symbol, mt5.TIMEFRAME_M1, start_time, end_time)
-    df = get_current_data(symbol, start_time, end_time, time_frame)
-    filename = f"{symbol}_m1_data.csv"
+    df = get_current_data(symbol, start_time, end_time, time_frame_daily)
+    filename = f"{symbol}_daily_data.csv"
     save_to_csv(df, filename)
     print(f"Data saved to {filename}")
     print(mt5.terminal_info())
