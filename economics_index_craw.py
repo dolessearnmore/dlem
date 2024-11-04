@@ -4,6 +4,7 @@ import requests
 import json
 from datetime import datetime, timedelta
 import pandas as pd
+import matplotlib.pyplot as plt
 # Load environment variables from .env file
 load_dotenv()
 
@@ -44,6 +45,50 @@ def get_economic_indicators():
         print(f"Error fetching data: {response.status_code}")
         return None
 
+def plot_line_chart(df, date_column, value_column, title='Line Chart'):
+    """
+    Plots a line chart with the x-axis as the date and the y-axis as values.
+    
+    :param df: pandas DataFrame containing the data
+    :param date_column: name of the column containing dates
+    :param value_column: name of the column containing values to plot on the y-axis
+    :param title: Title of the chart
+    """
+        # Reset the index so that 'date' becomes a regular column
+    df = df.reset_index()
+    # Ensure the date column is in datetime format
+    df[date_column] = pd.to_datetime(df[date_column])
+
+    # Sort values by date to ensure proper plotting
+    df = df.sort_values(by=date_column)
+
+    # Plotting the line chart
+    plt.figure(figsize=(10, 6))  # Set figure size
+    plt.plot(df[date_column], df[value_column], label=value_column, marker='o')  # Add markers to make points visible
+    
+    # Add labels and title
+    plt.xlabel('Date')
+    plt.ylabel('Value')
+    plt.title(title)
+
+    # Optional: Rotate date labels for better visibility
+    plt.xticks(rotation=45)
+
+    # Show the grid
+    plt.grid(True)
+
+    # Display the legend
+    plt.legend()
+
+    # Show the plot
+    plt.tight_layout()
+    plt.show()
+
+# Example Usage:
+# Assuming 'df' is your DataFrame and has columns 'Date' and 'Adj Close'
+# plot_line_chart(df, 'Date', 'Adj Close', title='Gold Prices over Time')
+
 indicators = get_economic_indicators()
 print(indicators)
+plot_line_chart(indicators, 'date', 'value', title='Unemployment rate percent change')
 # Example of printing key economic events
