@@ -110,7 +110,7 @@ def get_mt5_data(symbol, time_frame, start_time, end_time):
     }.get(time_frame, str(time_frame))  # Use friendly names for common timeframes
 
     # Format the filename with symbol, timeframe, and dates
-    filename = f"{symbol}_{timeframe_str}_{start_time.strftime('%Y%m%d')}_{end_time.strftime('%Y%m%d')}.csv"
+    filename = f"./Stock_Index_Craw/{symbol}_{timeframe_str}_{start_time.strftime('%Y%m%d')}_{end_time.strftime('%Y%m%d')}.csv"
 
     # Save to CSV
     df.to_csv(filename, index=False)

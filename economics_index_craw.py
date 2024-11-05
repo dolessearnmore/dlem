@@ -8,13 +8,19 @@ import matplotlib.pyplot as plt
 # Load environment variables from .env file
 load_dotenv()
 
-def get_economic_indicators():
+def get_economic_indicators(series_id, data_type):
+    """
+    Fetches economic data (UNRATE, CPI, etc.) from the St. Louis Fed API and saves it to a CSV file.
+    
+    :param series_id: The series ID for the economic data (e.g., 'UNRATE', 'CPIAUCSL').
+    :param data_type: A string describing the type of data being fetched (e.g., 'unemployment', 'cpi').
+    :return: A DataFrame with the fetched data.
+    """
     api_key = os.getenv('ST_LOUIS_FRED_KEY')
     # URL to fetch important economic indicators (e.g., GDP, inflation, etc.)
     base_url = "https://api.stlouisfed.org/fred/"
 
     obs_endpoint = 'series/observations'
-    series_id = "UNRATE"
     end_date = datetime.now()
     start_date =  end_date - timedelta(days=365 * 24)
     #ts_frequency = "q"
@@ -29,7 +35,8 @@ def get_economic_indicators():
         'units': ts_units
     }
     response = requests.get(base_url + obs_endpoint, params=obs_params)
-    
+     # Format the filename with symbol, timeframe, and dates
+    #filename = f"{series_id}_{timeframe_str}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"
     if response.status_code == 200:
         res_data = response.json()
         #print(json.dumps(res_data, indent=4))
@@ -40,11 +47,29 @@ def get_economic_indicators():
         obs_data['date'] = pd.DataFrame(obs_data['date'])
         obs_data.set_index('date', inplace=True)
         obs_data['value'] = obs_data['value'].astype(float)
+
+        # Format the filename and save the data to CSV
+        filename = f"./Economic_Index_Craw/{data_type}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"
+        obs_data.to_csv(filename)
+        print(f"Data saved to {filename}")
         return obs_data
     else:
         print(f"Error fetching data: {response.status_code}")
         return None
-
+def fetch_multiple_indicators():
+    """
+    Fetch multiple economic indicators and save each dataset as a CSV file.
+    """
+    indicators = {
+        'UNRATE': 'unemployment',  # Unemployment rate
+        'CPIAUCSL': 'cpi',         # Consumer Price Index for All Urban Consumers
+        'FEDFUNDS': 'interest_rate' # Effective Federal Funds Rate
+    }
+    
+    for series_id, data_type in indicators.items():
+        print(f"Fetching data for {data_type} ({series_id})...")
+        get_economic_indicators(series_id, data_type)
+        
 def plot_line_chart(df, date_column, value_column, title='Line Chart'):
     """
     Plots a line chart with the x-axis as the date and the y-axis as values.
@@ -87,8 +112,6 @@ def plot_line_chart(df, date_column, value_column, title='Line Chart'):
 # Example Usage:
 # Assuming 'df' is your DataFrame and has columns 'Date' and 'Adj Close'
 # plot_line_chart(df, 'Date', 'Adj Close', title='Gold Prices over Time')
-
-indicators = get_economic_indicators()
-print(indicators)
-plot_line_chart(indicators, 'date', 'value', title='Unemployment rate percent change')
+#fetch_multiple_indicators()
+# plot_line_chart(indicators, 'date', 'value', title='Unemployment rate percent change')
 # Example of printing key economic events
