@@ -1,3 +1,5 @@
 myenv/
 .env
 __pycache__/
+google-cloud-sdk/
+precise-data-439712-e7-a9358bb559ea.json
