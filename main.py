@@ -11,9 +11,11 @@ def main():
     mt5_helper.init_mt5()
 
     #Interactive fetch stock data
+    #Extract and transform to csv
     mt5_helper.user_interactive_data_fetch()
 
     #Fetch Economics data
+    #Extract and transofrm to csv
     print("* Prepare the economics data *")
     time.sleep(1)
     ec.fetch_multiple_indicators()
