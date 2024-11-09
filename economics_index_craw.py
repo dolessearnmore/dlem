@@ -5,6 +5,7 @@ import json
 from datetime import datetime, timedelta
 import pandas as pd
 import matplotlib.pyplot as plt
+from gg_services import process_and_upload_data, load_data_to_bigquery
 # Load environment variables from .env file
 load_dotenv()
 
@@ -45,9 +46,9 @@ def get_economic_indicators(series_id, data_type):
         #return pretty_data
         obs_data = pd.DataFrame(res_data['observations'])
         obs_data['date'] = pd.DataFrame(obs_data['date'])
-        obs_data.set_index('date', inplace=True)
+        #obs_data.set_index('date', inplace=True)
         obs_data['value'] = obs_data['value'].astype(float)
-
+        #print(obs_data.index)
         # Format the filename and save the data to CSV
         filename = f"./Economic_Index_Craw/{data_type}_{start_date.strftime('%Y%m%d')}_{end_date.strftime('%Y%m%d')}.csv"
         obs_data.to_csv(filename)
@@ -68,7 +69,22 @@ def fetch_multiple_indicators():
     
     for series_id, data_type in indicators.items():
         print(f"Fetching data for {data_type} ({series_id})...")
-        get_economic_indicators(series_id, data_type)
+        df = get_economic_indicators(series_id, data_type)
+        print(df.columns)
+        process_and_upload_data(df, 
+                                data_type='economic', 
+                                symbol=series_id, 
+                                start_date=df['date'].iloc[0].replace('-', ''), 
+                                end_date=df['date'].iloc[-1].replace('-', ''))
+    print("Load to big query")
+    # Load to Bigquery
+    bucket_name = os.getenv("BUCKET_STORAGE")
+    root_name = os.getenv("ECONOMIC_DATASET_ID")
+    dataset_id = os.getenv("ECONOMIC_DATASET_ID")
+    #print(bucket_name, root_name, dataset_id)
+    load_data_to_bigquery(bucket_name=bucket_name, root_folder=root_name, dataset_id=dataset_id)
+    #print("Load done")
+
         
 def plot_line_chart(df, date_column, value_column, title='Line Chart'):
     """

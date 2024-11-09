@@ -17,7 +17,8 @@ def main():
     #Fetch Economics data
     #Extract and transofrm to csv
     print("* Prepare the economics data *")
-    time.sleep(1)
+    print("******************************")
+    time.sleep(2)
     ec.fetch_multiple_indicators()
 if __name__ == "__main__":
     main()

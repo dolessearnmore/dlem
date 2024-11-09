@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import os
 from dotenv import load_dotenv
+from gg_services import process_and_upload_data, load_data_to_bigquery
 # Load environment variables from .env file
 load_dotenv()
 
@@ -115,12 +116,13 @@ def get_mt5_data(symbol, time_frame, start_time, end_time):
     # Save to CSV
     df.to_csv(filename, index=False)
     print(f"Data saved to {filename}")
-
+    
     # Print terminal information
     print(mt5.terminal_info())
 
     # Shutdown MT5
     mt5.shutdown()
+    return df
 def user_interactive_data_fetch():
     """
     Interactively asks the user to choose a symbol, timeframe, and start time,
@@ -179,4 +181,20 @@ def user_interactive_data_fetch():
     print(f"End time: {end_time.strftime('%Y-%m-%d')}")
 
     # Fetch and save the data
-    get_mt5_data(symbol, time_frame, start_time, end_time)
+    df = get_mt5_data(symbol, time_frame, start_time, end_time)
+
+    # Upload to bucket storage
+    process_and_upload_data(
+        df,
+        data_type="stock", 
+        timeframe=timeframe_str, 
+        symbol=symbol, 
+        start_date=start_time.strftime('%Y%m%d'), 
+        end_date=end_time.strftime('%Y%m%d'))
+        # Load to Bigquery
+    bucket_name = os.getenv("BUCKET_STORAGE")
+    root_name = os.getenv("STOCK_DATASET_ID")
+    dataset_id = os.getenv("STOCK_DATASET_ID")
+    print(bucket_name, root_name, dataset_id)
+    load_data_to_bigquery(bucket_name=bucket_name, root_folder=root_name, dataset_id=dataset_id)
+    print("Load done")
